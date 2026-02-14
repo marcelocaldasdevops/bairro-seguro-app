@@ -1,0 +1,39 @@
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+// Fix for geolocator plugin missing properties during evaluation
+allprojects {
+    project.beforeEvaluate { p ->
+        // Only inject if it's a plugin/library project, not the main app
+        if (p.path != ":app") {
+            p.ext.flutter = [
+                compileSdkVersion: 34,
+                minSdkVersion: 21,
+                targetSdkVersion: 34,
+                ndkVersion: "25.1.8937393"
+            ]
+        }
+    }
+}
+
+rootProject.ext {
+    compileSdkVersion = 34
+    minSdkVersion = 21
+    targetSdkVersion = 34
+}
+
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}

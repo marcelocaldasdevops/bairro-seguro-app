@@ -1,0 +1,1 @@
+ /home/marcelo/Documentos/Meus/TestAntigravity/mobile/.dart_tool/flutter_build/e180bc8adf45c05b649259d33eecd309/native_assets.yaml: 
