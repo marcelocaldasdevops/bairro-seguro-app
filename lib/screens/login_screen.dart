@@ -34,37 +34,69 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Bairro Seguro', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-              SizedBox(height: 8),
-              Text('Login', style: TextStyle(color: Colors.grey)),
-              SizedBox(height: 48),
-              TextField(
-                controller: _usernameController,
-                decoration: InputDecoration(labelText: 'Usuário'),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Senha'),
-                obscureText: true,
-              ),
-              SizedBox(height: 32),
-              _isLoading
-                  ? CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: _login,
-                      child: Text('Entrar'),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(double.infinity, 50),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white, Colors.grey[50]!],
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.shield_outlined, size: 80, color: Theme.of(context).primaryColor),
+                SizedBox(height: 24),
+                Text('Bairro Seguro', 
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1)),
+                SizedBox(height: 8),
+                Text('Sua vizinhança mais conectada', 
+                  style: TextStyle(color: Colors.grey[600], fontSize: 16)),
+                SizedBox(height: 48),
+                TextField(
+                  controller: _usernameController,
+                  decoration: InputDecoration(
+                    labelText: 'Usuário',
+                    prefixIcon: Icon(Icons.person_outline),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
+                SizedBox(height: 16),
+                TextField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Senha',
+                    prefixIcon: Icon(Icons.lock_outline),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  obscureText: true,
+                ),
+                SizedBox(height: 32),
+                _isLoading
+                    ? CircularProgressIndicator()
+                    : ElevatedButton(
+                        onPressed: _login,
+                        child: Text('Entrar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size(double.infinity, 56),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
                       ),
-                    ),
-            ],
+                SizedBox(height: 24),
+                TextButton(
+                  onPressed: () => Navigator.pushNamed(context, '/register'),
+                  child: Text('Não tem uma conta? Cadastre-se agora',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -110,6 +110,10 @@ logger
 2.17
 file:///home/marcelo/.pub-cache/hosted/pub.dev/logger-2.6.2/
 file:///home/marcelo/.pub-cache/hosted/pub.dev/logger-2.6.2/lib/
+mask_text_input_formatter
+2.12
+file:///home/marcelo/.pub-cache/hosted/pub.dev/mask_text_input_formatter-2.9.0/
+file:///home/marcelo/.pub-cache/hosted/pub.dev/mask_text_input_formatter-2.9.0/lib/
 matcher
 3.0
 file:///home/marcelo/.pub-cache/hosted/pub.dev/matcher-0.12.16+1/
@@ -196,8 +200,8 @@ file:///home/marcelo/.pub-cache/hosted/pub.dev/wkt_parser-2.0.0/
 file:///home/marcelo/.pub-cache/hosted/pub.dev/wkt_parser-2.0.0/lib/
 mobile
 3.5
-file:///home/marcelo/Documentos/Meus/TestAntigravity/mobile/
-file:///home/marcelo/Documentos/Meus/TestAntigravity/mobile/lib/
+file:///home/marcelo/Documentos/Meus/bairro-seguro-app/
+file:///home/marcelo/Documentos/Meus/bairro-seguro-app/lib/
 sky_engine
 3.2
 file:///opt/flutter/bin/cache/pkg/sky_engine/

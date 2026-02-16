@@ -25,13 +25,18 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
   }
 
   Future<void> _determinePosition() async {
-    final position = await Geolocator.getCurrentPosition();
-    setState(() {
-      _selectedLocation = LatLng(position.latitude, position.longitude);
-    });
+    try {
+      final position = await Geolocator.getCurrentPosition();
+      setState(() {
+        _selectedLocation = LatLng(position.latitude, position.longitude);
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   void _submit() async {
+    if (_descriptionController.text.isEmpty) return;
     setState(() => _isLoading = true);
     try {
       await widget.apiService.createIncident({
@@ -42,14 +47,9 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
           'longitude': _selectedLocation.longitude,
         }
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Incidente relatado com sucesso!')),
-      );
       Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -62,27 +62,27 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Container(
+            SizedBox(
               height: 300,
               child: FlutterMap(
                 options: MapOptions(
                   initialCenter: _selectedLocation,
                   initialZoom: 15,
-                  onTap: (tapPosition, latlng) {
-                    setState(() => _selectedLocation = latlng);
-                  },
+                  onTap: (_, latlng) => setState(() => _selectedLocation = latlng),
                 ),
                 children: [
                   TileLayer(
                     urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'br.com.bairroseguro.app',
                   ),
+
                   MarkerLayer(
                     markers: [
                       Marker(
                         point: _selectedLocation,
                         width: 40,
                         height: 40,
-                        child: Icon(Icons.location_on, color: Colors.red, size: 40),
+                        child: Icon(Icons.location_on, color: Colors.red),
                       ),
                     ],
                   ),
@@ -90,37 +90,28 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(24),
+              padding: EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Text('Toque no mapa para indicar o local', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                  SizedBox(height: 16),
                   TextField(
                     controller: _descriptionController,
-                    decoration: InputDecoration(labelText: 'Descrição do ocorrido'),
+                    decoration: InputDecoration(labelText: 'Descrição'),
                     maxLines: 3,
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 20),
                   DropdownButtonFormField<String>(
                     value: _severity,
-                    decoration: InputDecoration(labelText: 'Gravidade'),
                     items: [
                       DropdownMenuItem(value: 'LOW', child: Text('Baixo')),
                       DropdownMenuItem(value: 'MEDIUM', child: Text('Médio')),
                       DropdownMenuItem(value: 'HIGH', child: Text('Alto')),
                     ],
-                    onChanged: (val) => setState(() => _severity = val!),
+                    onChanged: (v) => setState(() => _severity = v!),
                   ),
-                  SizedBox(height: 32),
-                  _isLoading
-                      ? CircularProgressIndicator()
-                      : ElevatedButton(
-                          onPressed: _submit,
-                          child: Text('Enviar Relato'),
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: Size(double.infinity, 50),
-                          ),
-                        ),
+                  SizedBox(height: 30),
+                  _isLoading 
+                    ? CircularProgressIndicator() 
+                    : ElevatedButton(onPressed: _submit, child: Text('Enviar')),
                 ],
               ),
             ),
