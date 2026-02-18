@@ -6,7 +6,17 @@ import 'screens/profile_screen.dart';
 import 'screens/report_incident_screen.dart';
 import 'services/api_service.dart';
 
-void main() {
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    print("Erro ao carregar .env: $e");
+    // Se falhar o carregamento (ex: em produção sem arquivo), o app não deve crashar
+    // mas o baseUrl terá que ser tratado no ApiService
+  }
   runApp(MyApp());
 }
 

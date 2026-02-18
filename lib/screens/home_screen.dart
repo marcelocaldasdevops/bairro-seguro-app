@@ -3,6 +3,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/api_service.dart';
+import 'package:translator/translator.dart';
+import '../helpers/utils.dart';
 
 class HomeScreen extends StatefulWidget {
   final ApiService apiService;
@@ -13,6 +15,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final translator = GoogleTranslator();
+  Map<String, String> _translatedSeverities = {};
   List<dynamic> _incidents = [];
   Map<String, dynamic>? _userProfile;
   LatLng _center = LatLng(-23.550520, -46.633308);
@@ -24,6 +28,29 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadIncidents();
     _loadProfile();
     _determinePosition();
+    _preloadTranslations();
+  }
+
+  Future<void> _preloadTranslations() async {
+    try {
+      final high = await translator.translate('HIGH', from: 'en', to: 'pt');
+      final medium = await translator.translate('MEDIUM', from: 'en', to: 'pt');
+      final low = await translator.translate('LOW', from: 'en', to: 'pt');
+
+      setState(() {
+        _translatedSeverities = {
+          'HIGH': high.text,
+          'MEDIUM': medium.text,
+          'LOW': low.text,
+        };
+      });
+    } catch (e) {
+      print('Erro ao traduzir: $e');
+    }
+  }
+
+  String _getSeverityText(String severity) {
+    return _translatedSeverities[severity] ?? severity;
   }
 
   Future<void> _loadProfile() async {
@@ -167,13 +194,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(incident['severity_level'], 
+                              Text(
+                                  _getSeverityText(incident['severity_level']),
                                 style: TextStyle(fontWeight: FontWeight.bold, 
                                 color: _getSeverityColor(incident['severity_level']))),
                               SizedBox(height: 8),
                               Text(incident['description']),
                               SizedBox(height: 16),
-                              Text('Relatado em: ${incident['datetime']}', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                              Text('Relatado em: ${Utils.formatDateTime(incident['datetime'])}', style: TextStyle(color: Colors.grey, fontSize: 12)),
                             ],
                           ),
                         ),

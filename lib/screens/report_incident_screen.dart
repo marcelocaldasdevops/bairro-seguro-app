@@ -48,12 +48,53 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
 
     setState(() => _isLoading = true);
     try {
+      // Primeiro, verifica se o perfil está completo
+      final profile = await widget.apiService.getProfile();
+      final isProfileComplete = profile['name'] != null && 
+                                 profile['name'] != '' &&
+                                 profile['cpf'] != null && 
+                                 profile['cpf'] != '' &&
+                                 profile['bairro'] != null && 
+                                 profile['bairro'] != '';
+      
+      if (!isProfileComplete) {
+        setState(() => _isLoading = false);
+        final shouldGoToProfile = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Perfil Incompleto'),
+            content: Text('Para criar um incidente, você precisa completar seu perfil com Nome, CPF e Bairro.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text('Ir para Perfil'),
+              ),
+            ],
+          ),
+        );
+        
+        if (shouldGoToProfile == true) {
+          Navigator.pop(context); // Fecha a tela de relato
+          // Assumindo que há uma rota para a tela de perfil
+        }
+        return;
+      }
+      
+      // Se o perfil está completo, cria o incidente
+      // Arredonda para 6 casas decimais para evitar erro de max_digits no backend
+      final latitude = double.parse(_selectedLocation.latitude.toStringAsFixed(6));
+      final longitude = double.parse(_selectedLocation.longitude.toStringAsFixed(6));
+      
       await widget.apiService.createIncident({
         'description': _descriptionController.text,
         'severity_level': _severity,
         'location': {
-          'latitude': _selectedLocation.latitude,
-          'longitude': _selectedLocation.longitude,
+          'latitude': latitude,
+          'longitude': longitude,
         }
       });
       ScaffoldMessenger.of(context).showSnackBar(
@@ -65,6 +106,7 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
         SnackBar(
           content: Text('Erro: $e'),
           backgroundColor: Colors.red,
+          duration: Duration(seconds: 5),
         ),
       );
     } finally {

@@ -1,12 +1,25 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
+
+
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.24:8000/api';
-  // static const String baseUrl = 'http://10.0.2.2:8000/api'; // Android Emulator
-  // static const String baseUrl = 'http://localhost:8000/api'; // iOS Simulator
+  // Tenta pegar do .env, se não existir usa um valor padrão
+  static String get baseUrl => dotenv.env['BASE_URL'] ?? 'https://35.193.57.27/api';
+  
+ 
   
   String? _token;
+
+  // Cliente HTTP que aceita certificados auto-assinados
+  http.Client get _client {
+    final ioc = HttpClient();
+    ioc.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+    return IOClient(ioc);
+  }
 
   void setToken(String token) {
     _token = token;
@@ -22,7 +35,7 @@ class ApiService {
   };
 
   Future<Map<String, dynamic>> login(String username, String password) async {
-    final response = await http.post(
+    final response = await _client.post(
       Uri.parse('$baseUrl/users/login/'),
       headers: _headers,
       body: jsonEncode({'username': username, 'password': password}),
@@ -38,7 +51,7 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> register(String username, String email, String password) async {
-    final response = await http.post(
+    final response = await _client.post(
       Uri.parse('$baseUrl/users/'),
       headers: _headers,
       body: jsonEncode({'username': username, 'email': email, 'password': password}),
@@ -52,7 +65,7 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getProfile() async {
-    final response = await http.get(
+    final response = await _client.get(
       Uri.parse('$baseUrl/users/me/'),
       headers: _headers,
     );
@@ -66,7 +79,7 @@ class ApiService {
 
   Future<void> updateProfile(Map<String, dynamic> data) async {
     final profile = await getProfile();
-    final response = await http.patch(
+    final response = await _client.patch(
       Uri.parse('$baseUrl/users/${profile['id']}/'),
       headers: _headers,
       body: jsonEncode(data),
@@ -78,7 +91,7 @@ class ApiService {
   }
 
   Future<List<dynamic>> getIncidents() async {
-    final response = await http.get(
+    final response = await _client.get(
       Uri.parse('$baseUrl/incidents/'),
       headers: _headers,
     );
@@ -91,15 +104,37 @@ class ApiService {
   }
 
   Future<void> createIncident(Map<String, dynamic> data) async {
-    final response = await http.post(
+    final response = await _client.post(
       Uri.parse('$baseUrl/incidents/'),
       headers: _headers,
       body: jsonEncode(data),
     );
-    
     if (response.statusCode != 201) {
       final errorData = jsonDecode(response.body);
-      throw Exception(errorData[0] ?? errorData['non_field_errors']?[0] ?? 'Erro ao criar incidente');
+      // Tenta extrair a mensagem de erro mais específica
+      String errorMessage = 'Erro ao criar incidente';
+      
+      if (errorData is Map) {
+        // Verifica se há erro de validação
+        if (errorData.containsKey('non_field_errors')) {
+          errorMessage = errorData['non_field_errors'][0];
+        } else if (errorData.containsKey('detail')) {
+          errorMessage = errorData['detail'];
+        } else {
+          // Pega o primeiro erro encontrado
+          final firstKey = errorData.keys.first;
+          final firstError = errorData[firstKey];
+          if (firstError is List && firstError.isNotEmpty) {
+            errorMessage = '$firstKey: ${firstError[0]}';
+          } else {
+            errorMessage = '$firstKey: $firstError';
+          }
+        }
+      } else if (errorData is List && errorData.isNotEmpty) {
+        errorMessage = errorData[0].toString();
+      }
+      
+      throw Exception(errorMessage);
     }
   }
 }

@@ -1,16 +1,11 @@
-# mobile
+# Bairro Seguro - Mobile
 
-A new Flutter project.
+Aplicativo de segurança comunitária desenvolvido em Flutter para relato e monitoramento de incidentes em bairros.
 
-## Getting Started
+## Documentação do Projeto
+- [**Product Requirements Document (PRD)**](PRD.md)
 
-This project is a starting point for a Flutter application.
+## Começando
 
-A few resources to get you started if this is your first Flutter project:
+Este projeto é o cliente mobile do ecossistema Bairro Seguro.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
