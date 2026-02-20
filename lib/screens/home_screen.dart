@@ -68,13 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildDrawerHeader() {
-    return UserAccountsDrawerHeader(
-      accountName: Text(_userProfile?['name'] ?? 'Usuário'),
-      accountEmail: Text(_userProfile?['email'] ?? ''),
-      currentAccountPicture: CircleAvatar(
-        backgroundColor: Colors.white,
-        child: Icon(Icons.person, size: 40, color: Colors.indigo),
-      ),
+    return DrawerHeader(
       decoration: BoxDecoration(
         color: Colors.indigo,
         gradient: LinearGradient(
@@ -82,6 +76,33 @@ class _HomeScreenState extends State<HomeScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: CircleAvatar(
+              radius: 36,
+              backgroundColor: Colors.white,
+              backgroundImage: AssetImage('assets/images/logo.png'),
+            ),
+          ),
+          SizedBox(height: 12),
+          Text(_userProfile?['name'] ?? 'Usuário', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(_userProfile?['email'] ?? '', style: TextStyle(color: Colors.white70, fontSize: 14)),
+        ],
       ),
     );
   }
@@ -131,7 +152,24 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bairro Seguro', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white24, width: 1),
+              ),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundColor: Colors.indigo,
+                backgroundImage: AssetImage('assets/images/logo.png'),
+              ),
+            ),
+            SizedBox(width: 12),
+            Text('Bairro Seguro', style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
         elevation: 0,
         centerTitle: true,
       ),

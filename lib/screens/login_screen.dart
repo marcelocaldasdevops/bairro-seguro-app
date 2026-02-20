@@ -48,7 +48,25 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.shield_outlined, size: 80, color: Theme.of(context).primaryColor),
+                Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: 70,
+                    backgroundColor: Colors.white,
+                    backgroundImage: AssetImage('assets/images/logo.png'),
+                  ),
+                ),
                 SizedBox(height: 24),
                 Text('Bairro Seguro', 
                   style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1)),
