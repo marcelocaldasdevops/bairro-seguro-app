@@ -34,11 +34,11 @@ class ApiService {
     if (_token != null) 'Authorization': 'Token $_token',
   };
 
-  Future<Map<String, dynamic>> login(String username, String password) async {
+  Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/users/login/'),
       headers: _headers,
-      body: jsonEncode({'username': username, 'password': password}),
+      body: jsonEncode({'email': email, 'password': password}),
     );
     
     if (response.statusCode == 200) {
