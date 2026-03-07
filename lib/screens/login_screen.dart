@@ -10,7 +10,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
@@ -18,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
     try {
       await widget.apiService.login(
-        _usernameController.text,
+        _emailController.text,
         _passwordController.text,
       );
       Navigator.pushReplacementNamed(context, '/home');
@@ -75,10 +75,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(color: Colors.grey[600], fontSize: 16)),
                 SizedBox(height: 48),
                 TextField(
-                  controller: _usernameController,
+                  controller: _emailController,
                   decoration: InputDecoration(
-                    labelText: 'Usuário',
-                    prefixIcon: Icon(Icons.person_outline),
+                    labelText: 'E-mail',
+                    prefixIcon: Icon(Icons.email_outlined),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     filled: true,
                     fillColor: Colors.white,
