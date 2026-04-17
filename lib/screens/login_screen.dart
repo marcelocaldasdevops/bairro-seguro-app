@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/api_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -33,13 +34,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.white, Colors.grey[50]!],
+            colors: isDark
+                ? [Color(0xFF1E1E1E), Color(0xFF121212)]
+                : [Colors.white, Colors.grey[50]!],
           ),
         ),
         child: Center(
@@ -68,31 +74,44 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 SizedBox(height: 24),
-                Text('Bairro Seguro', 
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1)),
+                Text('Bairro Seguro',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -1,
+                      color: theme.colorScheme.primary,
+                    )),
                 SizedBox(height: 8),
-                Text('Sua vizinhança mais conectada', 
-                  style: TextStyle(color: Colors.grey[600], fontSize: 16)),
+                Text('Sua vizinhança mais conectada',
+                    style: TextStyle(
+                        color: theme.colorScheme.primary.withOpacity(0.7),
+                        fontSize: 16)),
                 SizedBox(height: 48),
                 TextField(
                   controller: _emailController,
+                  style: TextStyle(color: theme.colorScheme.onSurface),
                   decoration: InputDecoration(
                     labelText: 'E-mail',
-                    prefixIcon: Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    labelStyle:
+                        TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                    prefixIcon: Icon(Icons.email_outlined,
+                        color: theme.colorScheme.primary),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: theme.colorScheme.surfaceContainerHighest,
                   ),
                 ),
                 SizedBox(height: 16),
                 TextField(
                   controller: _passwordController,
+                  style: TextStyle(color: theme.colorScheme.onSurface),
                   decoration: InputDecoration(
                     labelText: 'Senha',
-                    prefixIcon: Icon(Icons.lock_outline),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    labelStyle:
+                        TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                    prefixIcon: Icon(Icons.lock_outline,
+                        color: theme.colorScheme.primary),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: theme.colorScheme.surfaceContainerHighest,
                   ),
                   obscureText: true,
                 ),
@@ -100,18 +119,25 @@ class _LoginScreenState extends State<LoginScreen> {
                 _isLoading
                     ? CircularProgressIndicator()
                     : ElevatedButton(
-                        onPressed: _login,
-                        child: Text('Entrar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: Size(double.infinity, 56),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          _login();
+                        },
+                        child: Text('Entrar',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
                       ),
                 SizedBox(height: 24),
                 TextButton(
-                  onPressed: () => Navigator.pushNamed(context, '/register'),
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    Navigator.pushNamed(context, '/register');
+                  },
                   child: Text('Não tem uma conta? Cadastre-se agora',
-                    style: TextStyle(fontWeight: FontWeight.w600)),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary,
+                      )),
                 ),
               ],
             ),

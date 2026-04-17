@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/api_service.dart';
 import 'package:translator/translator.dart';
 import '../helpers/utils.dart';
+import '../widgets/skeleton_incident.dart';
+import '../widgets/incident_list_item.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final ApiService apiService;
@@ -21,6 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? _userProfile;
   LatLng _center = LatLng(-23.550520, -46.633308);
   final MapController _mapController = MapController();
+  int _currentIndex = 0;
+  bool _isLoadingIncidents = false;
 
   @override
   void initState() {
@@ -100,20 +106,30 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           SizedBox(height: 12),
-          Text(_userProfile?['name'] ?? 'Usuário', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-          Text(_userProfile?['email'] ?? '', style: TextStyle(color: Colors.white70, fontSize: 14)),
+          Text(_userProfile?['name'] ?? 'Usuário',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold)),
+          Text(_userProfile?['email'] ?? '',
+              style: TextStyle(color: Colors.white70, fontSize: 14)),
         ],
       ),
     );
   }
 
   Future<void> _loadIncidents() async {
+    setState(() => _isLoadingIncidents = true);
     try {
       final data = await widget.apiService.getIncidents();
       print('Incidentes carregados: ${data.length}');
-      setState(() => _incidents = data);
+      setState(() {
+        _incidents = data;
+        _isLoadingIncidents = false;
+      });
     } catch (e) {
       print('Erro ao carregar incidentes: $e');
+      setState(() => _isLoadingIncidents = false);
     }
   }
 
@@ -129,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) return;
     }
-    
+
     if (permission == LocationPermission.deniedForever) return;
 
     final position = await Geolocator.getCurrentPosition();
@@ -141,15 +157,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Color _getSeverityColor(String severity) {
     switch (severity) {
-      case 'HIGH': return Colors.red;
-      case 'MEDIUM': return Colors.orange;
-      case 'LOW': return Colors.green;
-      default: return Colors.blue;
+      case 'HIGH':
+        return Colors.red;
+      case 'MEDIUM':
+        return Colors.orange;
+      case 'LOW':
+        return Colors.green;
+      default:
+        return Colors.blue;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -162,138 +184,137 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: CircleAvatar(
                 radius: 18,
-                backgroundColor: Colors.indigo,
+                backgroundColor: theme.colorScheme.primary,
                 backgroundImage: AssetImage('assets/images/logo.png'),
               ),
             ),
             SizedBox(width: 12),
-            Text('Bairro Seguro', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('Bairro Seguro',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onPrimary,
+                )),
           ],
         ),
         elevation: 0,
         centerTitle: true,
+        backgroundColor: theme.colorScheme.primaryContainer,
+        foregroundColor: theme.colorScheme.onPrimaryContainer,
       ),
       drawer: Drawer(
         child: Column(
           children: [
             _buildDrawerHeader(),
             ListTile(
-              leading: Icon(Icons.home_outlined),
-              title: Text('Início'),
+              leading: Icon(Icons.settings_outlined),
+              title: Text('Configurações'),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading: Icon(Icons.person_outline),
-              title: Text('Meu Perfil'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/profile');
-              },
+              leading: Icon(Icons.help_outline),
+              title: Text('Ajuda'),
+              onTap: () => Navigator.pop(context),
             ),
             Divider(),
             Spacer(),
             ListTile(
               leading: Icon(Icons.logout, color: Colors.red),
-              title: Text('Sair', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+              title: Text('Sair',
+                  style: TextStyle(
+                      color: Colors.red, fontWeight: FontWeight.bold)),
               onTap: _logout,
             ),
             SizedBox(height: 20),
           ],
         ),
       ),
-      body: FlutterMap(
-        mapController: _mapController,
-        options: MapOptions(
-          initialCenter: _center,
-          initialZoom: 13,
-        ),
+      body: IndexedStack(
+        index: _currentIndex,
         children: [
-          TileLayer(
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'br.com.bairroseguro.app',
-          ),
-          MarkerLayer(
-            markers: _incidents.map((incident) {
-              try {
-                final lat = double.parse(incident['location']['latitude'].toString());
-                final lng = double.parse(incident['location']['longitude'].toString());
-                
-                return Marker(
-                  point: LatLng(lat, lng),
-                  width: 40,
-                  height: 40,
-                  child: GestureDetector(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) => Container(
-                          padding: EdgeInsets.all(24),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                  _getSeverityText(incident['severity_level']),
-                                style: TextStyle(fontWeight: FontWeight.bold, 
-                                color: _getSeverityColor(incident['severity_level']))),
-                              SizedBox(height: 8),
-                              Text(incident['description']),
-                              SizedBox(height: 16),
-                              Text('Relatado em: ${Utils.formatDateTime(incident['datetime'])}', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: _getSeverityColor(incident['severity_level']),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                        boxShadow: [
-                          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))
-                        ],
-                      ),
-                      child: Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
-                    ),
-                  ),
-                );
-              } catch (e) {
-                print('Erro ao carregar marcador: $e');
-                return Marker(point: LatLng(0, 0), child: SizedBox.shrink());
-              }
-            }).toList(),
-          ),
+          _buildMapView(),
+          _buildListView(),
+          ProfileScreen(
+              apiService: widget.apiService,
+              showAppBar: false), // Using ProfileScreen as a widget
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => Center(child: CircularProgressIndicator()),
-          );
-          
-          try {
-            final profile = await widget.apiService.getProfile();
-            Navigator.pop(context); // Close loading dialog
-            
-            if (profile['is_profile_complete'] == true) {
-              Navigator.pushNamed(context, '/report').then((_) => _loadIncidents());
-            } else {
-              _showIncompleteProfileModal();
-            }
-          } catch (e) {
-            Navigator.pop(context); // Close loading dialog
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Erro ao verificar perfil: $e')),
-            );
-          }
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
+          HapticFeedback.selectionClick();
+          setState(() => _currentIndex = index);
         },
-        label: Text('Relatar Incidente', style: TextStyle(fontWeight: FontWeight.bold)),
-        icon: Icon(Icons.add_location_alt_rounded),
-        elevation: 4,
+        destinations: [
+          NavigationDestination(
+            icon: Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: Icon(Icons.map_outlined, size: 28),
+            ),
+            selectedIcon: Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: Icon(Icons.map, size: 28),
+            ),
+            label: 'Mapa',
+          ),
+          NavigationDestination(
+            icon: Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: Icon(Icons.list_alt_rounded, size: 28),
+            ),
+            selectedIcon: Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: Icon(Icons.list_alt_rounded, size: 28),
+            ),
+            label: 'Incidentes',
+          ),
+          NavigationDestination(
+            icon: Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: Icon(Icons.person_outline, size: 28),
+            ),
+            selectedIcon: Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: Icon(Icons.person, size: 28),
+            ),
+            label: 'Perfil',
+          ),
+        ],
+        height: 80,
       ),
+      floatingActionButton: _currentIndex == 2
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () async {
+                HapticFeedback.mediumImpact();
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) =>
+                      Center(child: CircularProgressIndicator()),
+                );
+
+                try {
+                  final profile = await widget.apiService.getProfile();
+                  Navigator.pop(context); // Close loading dialog
+
+                  if (profile['is_profile_complete'] == true) {
+                    Navigator.pushNamed(context, '/report')
+                        .then((_) => _loadIncidents());
+                  } else {
+                    _showIncompleteProfileModal();
+                  }
+                } catch (e) {
+                  Navigator.pop(context); // Close loading dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erro ao verificar perfil: $e')),
+                  );
+                }
+              },
+              label: Text('Relatar',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+              icon: Icon(Icons.add_location_alt_rounded, size: 24),
+              extendedPadding: EdgeInsets.symmetric(horizontal: 20),
+            ),
     );
   }
 
@@ -314,9 +335,11 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Para manter a segurança da nossa comunidade, solicitamos que você complete seu cadastro antes de relatar um incidente.'),
+            Text(
+                'Para manter a segurança da nossa comunidade, solicitamos que você complete seu cadastro antes de relatar um incidente.'),
             SizedBox(height: 16),
-            Text('Campos necessários:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            Text('Campos necessários:',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
             SizedBox(height: 8),
             _buildRequirementItem('Nome Completo'),
             _buildRequirementItem('CPF'),
@@ -335,7 +358,8 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: Text('Completar Perfil'),
             style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
             ),
           ),
         ],
@@ -352,6 +376,211 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(width: 8),
           Text(text, style: TextStyle(fontSize: 13)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMapView() {
+    return FlutterMap(
+      mapController: _mapController,
+      options: MapOptions(
+        initialCenter: _center,
+        initialZoom: 13,
+      ),
+      children: [
+        TileLayer(
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'br.com.bairroseguro.app',
+        ),
+        MarkerLayer(
+          markers: _incidents.map((incident) {
+            try {
+              final lat =
+                  double.parse(incident['location']['latitude'].toString());
+              final lng =
+                  double.parse(incident['location']['longitude'].toString());
+
+              return Marker(
+                point: LatLng(lat, lng),
+                width: 52,
+                height: 52,
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _showIncidentDetails(incident);
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: _getSeverityColor(incident['severity_level'])
+                          .withOpacity(0.9),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 6,
+                            offset: Offset(0, 3))
+                      ],
+                    ),
+                    child: Icon(Icons.warning_amber_rounded,
+                        color: Colors.white, size: 28),
+                  ),
+                ),
+              );
+            } catch (e) {
+              return Marker(point: LatLng(0, 0), child: SizedBox.shrink());
+            }
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildListView() {
+    if (_isLoadingIncidents) {
+      return ListView.builder(
+        itemCount: 6,
+        padding: EdgeInsets.only(top: 16),
+        itemBuilder: (context, index) => const SkeletonIncident(),
+      );
+    }
+
+    if (_incidents.isEmpty) {
+      final theme = Theme.of(context);
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.check_circle_outline,
+                size: 64, color: theme.colorScheme.onSurfaceVariant),
+            SizedBox(height: 16),
+            Text('Nenhum incidente relatado no momento',
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadIncidents,
+      child: ListView.builder(
+        itemCount: _incidents.length,
+        padding: EdgeInsets.only(top: 16, bottom: 80),
+        itemBuilder: (context, index) {
+          final incident = _incidents[index];
+          return IncidentListItem(
+            incident: incident,
+            onTap: () {
+              HapticFeedback.lightImpact();
+
+              // 1. Pegar coordenadas do incidente
+              final lat =
+                  double.parse(incident['location']['latitude'].toString());
+              final lng =
+                  double.parse(incident['location']['longitude'].toString());
+              final incidentPoint = LatLng(lat, lng);
+
+              // 2. Mudar para a aba do Mapa (índice 0)
+              setState(() => _currentIndex = 0);
+
+              // 3. Mover o mapa para o ponto e mostrar detalhes
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _mapController.move(incidentPoint, 15);
+                _showIncidentDetails(incident);
+              });
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  void _showIncidentDetails(dynamic incident) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      showDragHandle: true,
+      builder: (context) => Container(
+        padding: EdgeInsets.fromLTRB(24, 0, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _getSeverityColor(incident['severity_level'])
+                        .withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.warning_amber_rounded,
+                    color: _getSeverityColor(incident['severity_level']),
+                    size: 32,
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _getSeverityText(incident['severity_level']),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: _getSeverityColor(incident['severity_level']),
+                        ),
+                      ),
+                      Text(
+                        'Incidente Relatado',
+                        style: TextStyle(color: Colors.grey, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 24),
+            Text(
+              'Descrição:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            SizedBox(height: 8),
+            Text(
+              incident['description'],
+              style: TextStyle(fontSize: 16, height: 1.5),
+            ),
+            SizedBox(height: 24),
+            Divider(),
+            SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(Icons.access_time, size: 18, color: Colors.grey),
+                SizedBox(width: 8),
+                Text(
+                  'Data e Hora: ${Utils.formatDateTime(incident['datetime'])}',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                ),
+              ],
+            ),
+            SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(Icons.location_on_outlined, size: 18, color: Colors.grey),
+                SizedBox(width: 8),
+                Text(
+                  'Bairro: ${incident['neighborhood'] ?? 'Não informado'}',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

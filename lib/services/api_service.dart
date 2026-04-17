@@ -3,21 +3,20 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiService {
   // Tenta pegar do .env, se não existir usa um valor padrão
-  static String get baseUrl => dotenv.env['BASE_URL'] ?? 'http://10.0.2.2:8000/api';
-  
- 
-  
+  static String get baseUrl =>
+      dotenv.env['BASE_URL'] ?? 'http://10.0.2.2:8000/api';
+
   String? _token;
 
   // Cliente HTTP que aceita certificados auto-assinados
   http.Client get _client {
     final ioc = HttpClient();
-    ioc.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+    ioc.badCertificateCallback =
+        (X509Certificate cert, String host, int port) => true;
     return IOClient(ioc);
   }
 
@@ -30,9 +29,9 @@ class ApiService {
   }
 
   Map<String, String> get _headers => {
-    'Content-Type': 'application/json',
-    if (_token != null) 'Authorization': 'Token $_token',
-  };
+        'Content-Type': 'application/json',
+        if (_token != null) 'Authorization': 'Token $_token',
+      };
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await _client.post(
@@ -40,7 +39,7 @@ class ApiService {
       headers: _headers,
       body: jsonEncode({'email': email, 'password': password}),
     );
-    
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       _token = data['token'];
@@ -50,17 +49,38 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> register(String username, String email, String password) async {
+  Future<Map<String, dynamic>> register(
+      String username, String email, String password) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/users/'),
       headers: _headers,
-      body: jsonEncode({'username': username, 'email': email, 'password': password}),
+      body: jsonEncode(
+          {'username': username, 'email': email, 'password': password}),
     );
-    
+
     if (response.statusCode == 201) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Erro no registro');
+      // Debug: mostra o erro real do servidor
+      final errorBody =
+          response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      String errorMessage = 'Erro no registro';
+
+      if (errorBody is Map) {
+        // Formata os erros de validação do Django
+        final errors = <String>[];
+        errorBody.forEach((key, value) {
+          if (value is List && value.isNotEmpty) {
+            errors.add('$key: ${value.join(', ')}');
+          } else if (value is String) {
+            errors.add('$key: $value');
+          }
+        });
+        if (errors.isNotEmpty) {
+          errorMessage = errors.join('\n');
+        }
+      }
+      throw Exception(errorMessage);
     }
   }
 
@@ -69,7 +89,7 @@ class ApiService {
       Uri.parse('$baseUrl/users/me/'),
       headers: _headers,
     );
-    
+
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -84,7 +104,7 @@ class ApiService {
       headers: _headers,
       body: jsonEncode(data),
     );
-    
+
     if (response.statusCode != 200) {
       throw Exception('Erro ao atualizar perfil');
     }
@@ -95,7 +115,7 @@ class ApiService {
       Uri.parse('$baseUrl/incidents/'),
       headers: _headers,
     );
-    
+
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -113,7 +133,7 @@ class ApiService {
       final errorData = jsonDecode(response.body);
       // Tenta extrair a mensagem de erro mais específica
       String errorMessage = 'Erro ao criar incidente';
-      
+
       if (errorData is Map) {
         // Verifica se há erro de validação
         if (errorData.containsKey('non_field_errors')) {
@@ -133,7 +153,7 @@ class ApiService {
       } else if (errorData is List && errorData.isNotEmpty) {
         errorMessage = errorData[0].toString();
       }
-      
+
       throw Exception(errorMessage);
     }
   }

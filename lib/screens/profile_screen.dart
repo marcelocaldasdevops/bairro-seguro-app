@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import '../services/api_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   final ApiService apiService;
-  ProfileScreen({required this.apiService});
+  final bool showAppBar;
+  ProfileScreen({required this.apiService, this.showAppBar = true});
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -52,7 +54,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Perfil atualizado com sucesso!')),
       );
-      Navigator.pop(context);
+      if (widget.showAppBar) {
+        Navigator.pop(context);
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString())),
@@ -64,6 +68,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final content = Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Theme.of(context).colorScheme.surface,
+            Theme.of(context).colorScheme.surfaceContainerHighest,
+          ],
+        ),
+      ),
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildHeader(),
+            SizedBox(height: 32),
+            _buildFields(),
+            SizedBox(height: 32),
+            _buildSaveButton(),
+            SizedBox(height: 16),
+            _buildLogoutButton(),
+            if (!widget.showAppBar) SizedBox(height: 80), // Padding for bottom nav
+          ],
+        ),
+      ),
+    );
+
+    if (!widget.showAppBar) return content;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Meu Perfil'),
@@ -71,39 +106,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.transparent,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Theme.of(context).colorScheme.surface,
-              Theme.of(context).colorScheme.surfaceContainerHighest,
-            ],
-          ),
-        ),
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildHeader(),
-              SizedBox(height: 32),
-              _buildFields(),
-              SizedBox(height: 32),
-              _buildSaveButton(),
-              SizedBox(height: 16),
-              _buildLogoutButton(),
-            ],
-          ),
-        ),
-      ),
+      body: content,
     );
   }
 
   Widget _buildLogoutButton() {
     return OutlinedButton.icon(
       onPressed: () {
+        HapticFeedback.mediumImpact();
         widget.apiService.logout();
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       },
@@ -190,7 +200,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return _isLoading
         ? Center(child: CircularProgressIndicator())
         : ElevatedButton(
-            onPressed: _save,
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              _save();
+            },
             child: Text('Salvar Alterações', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16),

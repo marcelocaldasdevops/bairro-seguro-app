@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
@@ -170,7 +171,8 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
                   Positioned(
                     bottom: 16,
                     right: 16,
-                    child: FloatingActionButton.small(
+                    child: FloatingActionButton(
+                      mini: true,
                       heroTag: 'recenter_map',
                       onPressed: _determinePosition,
                       child: Icon(Icons.my_location),
@@ -216,7 +218,10 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
                   _isLoading 
                     ? Center(child: CircularProgressIndicator()) 
                     : ElevatedButton(
-                        onPressed: _submit,
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          _submit();
+                        },
                         child: Text('Enviar Relato', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.symmetric(vertical: 16),
