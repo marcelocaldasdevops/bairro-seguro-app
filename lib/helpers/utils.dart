@@ -11,7 +11,6 @@ class Utils {
       final formatter = DateFormat('dd/MM/yyyy HH:mm:ss');
       return formatter.format(dateTime);
     } catch (e) {
-      print("Erro ao formatar data: $e");
       return dateTimeString;
     }
   }

@@ -12,24 +12,31 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await dotenv.load(fileName: ".env");
-  } catch (e) {
-    print("Erro ao carregar .env: $e");
+  } catch (_) {
     // Se falhar o carregamento (ex: em produção sem arquivo), o app não deve crashar
     // mas o baseUrl terá que ser tratado no ApiService
   }
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   final ApiService apiService = ApiService();
+  late final Future<bool> _sessionFuture = apiService.restoreSession();
 
   ThemeData _buildTheme(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
-    final primaryColor = isDark ? Color(0xFF7986FB) : Colors.indigo;
-    final backgroundColor = isDark ? Color(0xFF121212) : Colors.grey[50];
-    final surfaceColor = isDark ? Color(0xFF1E1E1E) : Colors.white;
-    final textColor = isDark ? Colors.white : Colors.grey[900];
-    final textSecondary = isDark ? Colors.grey[400] : Colors.grey[600];
+    final primaryColor = isDark ? const Color(0xFF5A8CFF) : const Color(0xFF365FD9);
+    final backgroundColor = isDark ? const Color(0xFF0B0F14) : const Color(0xFFF4F7FC);
+    final surfaceColor = isDark ? const Color(0xFF151B24) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF101828);
+    final textSecondary = isDark ? const Color(0xFF9AA4B2) : const Color(0xFF667085);
 
     return ThemeData(
       useMaterial3: true,
@@ -42,21 +49,21 @@ class MyApp extends StatelessWidget {
       scaffoldBackgroundColor: backgroundColor,
       fontFamily: 'Inter',
       appBarTheme: AppBarTheme(
-        backgroundColor: isDark ? Color(0xFF1E1E1E) : Colors.indigo[900],
-        foregroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0B0F14) : const Color(0xFFF4F7FC),
+        foregroundColor: isDark ? Colors.white : const Color(0xFF203B85),
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         titleTextStyle: TextStyle(
           fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          color: isDark ? Colors.white : const Color(0xFF203B85),
         ),
       ),
       cardTheme: CardTheme(
         color: surfaceColor,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
           side:
               BorderSide(color: isDark ? Colors.grey[800]! : Colors.grey[200]!),
         ),
@@ -65,11 +72,11 @@ class MyApp extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
-          minimumSize: Size(double.infinity, 56),
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          minimumSize: const Size(double.infinity, 56),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -88,7 +95,7 @@ class MyApp extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: primaryColor, width: 2),
         ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       ),
       textTheme: TextTheme(
         bodyLarge: TextStyle(color: textColor, fontSize: 16),
@@ -100,7 +107,7 @@ class MyApp extends StatelessWidget {
         bodySmall: TextStyle(color: textSecondary, fontSize: 12),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: surfaceColor,
+        backgroundColor: isDark ? const Color(0xFF0F141C) : Colors.white,
         indicatorColor: primaryColor.withOpacity(0.2),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -120,11 +127,11 @@ class MyApp extends StatelessWidget {
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: surfaceColor,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
       ),
@@ -133,7 +140,7 @@ class MyApp extends StatelessWidget {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: isDark ? Colors.grey[800] : Colors.grey[900],
-        contentTextStyle: TextStyle(color: Colors.white),
+        contentTextStyle: const TextStyle(color: Colors.white),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -148,7 +155,20 @@ class MyApp extends StatelessWidget {
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
       themeMode: ThemeMode.system,
-      initialRoute: '/login',
+      home: FutureBuilder<bool>(
+        future: _sessionFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const _BootstrapScreen();
+          }
+
+          if (snapshot.data == true) {
+            return HomeScreen(apiService: apiService);
+          }
+
+          return LoginScreen(apiService: apiService);
+        },
+      ),
       routes: {
         '/login': (context) => LoginScreen(apiService: apiService),
         '/register': (context) => RegisterScreen(apiService: apiService),
@@ -156,6 +176,19 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => ProfileScreen(apiService: apiService),
         '/report': (context) => ReportIncidentScreen(apiService: apiService),
       },
+    );
+  }
+}
+
+class _BootstrapScreen extends StatelessWidget {
+  const _BootstrapScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }

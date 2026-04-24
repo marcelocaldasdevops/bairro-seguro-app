@@ -6,10 +6,10 @@ import '../services/api_service.dart';
 class ProfileScreen extends StatefulWidget {
   final ApiService apiService;
   final bool showAppBar;
-  ProfileScreen({required this.apiService, this.showAppBar = true});
+  const ProfileScreen({super.key, required this.apiService, this.showAppBar = true});
 
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+  State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
@@ -25,6 +25,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   );
 
   @override
+  void dispose() {
+    _nameController.dispose();
+    _cpfController.dispose();
+    _bairroController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     _loadProfile();
@@ -38,8 +46,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _cpfController.text = profile['cpf'] ?? '';
         _bairroController.text = profile['bairro'] ?? '';
       });
-    } catch (e) {
-      print(e);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível carregar o perfil.')),
+      );
     }
   }
 
@@ -51,18 +62,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'cpf': _cpfController.text,
         'bairro': _bairroController.text,
       });
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Perfil atualizado com sucesso!')),
+        const SnackBar(content: Text('Perfil atualizado com sucesso!')),
       );
       if (widget.showAppBar) {
         Navigator.pop(context);
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString())),
       );
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -80,18 +95,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildHeader(),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             _buildFields(),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             _buildSaveButton(),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             _buildLogoutButton(),
-            if (!widget.showAppBar) SizedBox(height: 80), // Padding for bottom nav
+            if (!widget.showAppBar) const SizedBox(height: 80), // Padding for bottom nav
           ],
         ),
       ),
@@ -101,7 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Meu Perfil'),
+        title: const Text('Meu Perfil'),
         elevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
@@ -112,15 +127,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildLogoutButton() {
     return OutlinedButton.icon(
-      onPressed: () {
+      onPressed: () async {
         HapticFeedback.mediumImpact();
-        widget.apiService.logout();
+        await widget.apiService.logout();
+        if (!mounted) return;
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       },
-      icon: Icon(Icons.logout, color: Colors.red),
-      label: Text('Sair da Conta', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+      icon: const Icon(Icons.logout, color: Colors.red),
+      label: const Text('Sair da Conta', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
       style: OutlinedButton.styleFrom(
-        padding: EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         side: BorderSide(color: Colors.red.withOpacity(0.5)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -135,12 +151,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
           child: Icon(Icons.person_outline, size: 50, color: Theme.of(context).colorScheme.primary),
         ),
-        SizedBox(height: 16),
-        Text(
+        const SizedBox(height: 16),
+        const Text(
           'Informações Pessoais',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
           'Mantenha seus dados atualizados para relatar incidentes.',
           textAlign: TextAlign.center,
@@ -158,7 +174,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           label: 'Nome Completo',
           icon: Icons.badge_outlined,
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         _buildTextField(
           controller: _cpfController,
           label: 'CPF',
@@ -166,7 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           keyboardType: TextInputType.number,
           inputFormatters: [cpfMask],
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         _buildTextField(
           controller: _bairroController,
           label: 'Bairro',
@@ -198,17 +214,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildSaveButton() {
     return _isLoading
-        ? Center(child: CircularProgressIndicator())
+        ? const Center(child: CircularProgressIndicator())
         : ElevatedButton(
             onPressed: () {
               HapticFeedback.mediumImpact();
               _save();
             },
-            child: Text('Salvar Alterações', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
+            child: const Text('Salvar Alterações', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           );
   }
 }

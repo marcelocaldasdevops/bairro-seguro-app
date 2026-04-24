@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace = "com.bairroseguro.mobile"
-    compileSdkVersion 34
+    compileSdkVersion 35
     ndkVersion = "25.1.8937393"
 
     compileOptions {
@@ -39,7 +39,7 @@ android {
     defaultConfig {
         applicationId = "com.bairroseguro.mobile"
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 35
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
     }

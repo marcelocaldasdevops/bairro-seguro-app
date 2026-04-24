@@ -49,5 +49,9 @@
 		<false/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<key>NSCameraUsageDescription</key>
+		<string>Permita o uso da câmera para anexar evidências aos incidentes.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Permita o acesso à galeria para anexar evidências aos incidentes.</string>
 	</dict>
 </plist>

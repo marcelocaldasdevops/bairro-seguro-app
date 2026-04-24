@@ -5,10 +5,10 @@ import '../services/api_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   final ApiService apiService;
-  RegisterScreen({required this.apiService});
+  const RegisterScreen({super.key, required this.apiService});
 
   @override
-  _RegisterScreenState createState() => _RegisterScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
@@ -29,6 +29,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
     filter: {"#": RegExp(r'[0-9]')},
     type: MaskAutoCompletionType.lazy,
   );
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _nameController.dispose();
+    _cpfController.dispose();
+    _bairroController.dispose();
+    super.dispose();
+  }
 
   void _register() async {
     if (!_formKey.currentState!.validate()) return;
@@ -60,16 +71,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
         });
       }
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Cadastro realizado com sucesso!')),
+        const SnackBar(content: Text('Cadastro realizado com sucesso!')),
       );
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString())),
       );
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -84,7 +99,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         elevation: 0,
         foregroundColor: theme.colorScheme.primary,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -94,27 +109,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: isDark
-                ? [Color(0xFF1E1E1E), Color(0xFF121212)]
+                ? const [Color(0xFF1E1E1E), Color(0xFF121212)]
                 : [Colors.white, Colors.grey[50]!],
           ),
         ),
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _buildHeader(),
-                SizedBox(height: 32),
+                const SizedBox(height: 32),
                 _buildBaseFields(),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 _buildOptionalToggle(),
                 if (_showOptionalFields) ...[
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildOptionalFields(),
                 ],
-                SizedBox(height: 48),
+                const SizedBox(height: 48),
                 _buildSubmitButton(),
               ],
             ),
@@ -130,7 +145,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       children: [
         Icon(Icons.person_add_outlined,
             size: 64, color: theme.colorScheme.primary),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Text(
           'Junte-se ao Bairro Seguro',
           style: TextStyle(
@@ -140,7 +155,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
           'Sua segurança começa com a colaboração.',
           style: TextStyle(color: theme.colorScheme.primary.withOpacity(0.7)),
@@ -159,7 +174,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           icon: Icons.person_outline,
           validator: (val) => val!.isEmpty ? 'Campo obrigatório' : null,
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         _buildTextField(
           controller: _emailController,
           label: 'E-mail',
@@ -168,7 +183,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           validator: (val) =>
               val!.isEmpty || !val.contains('@') ? 'E-mail inválido' : null,
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         _buildTextField(
           controller: _passwordController,
           label: 'Senha',
@@ -190,7 +205,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
           border: Border.all(color: theme.colorScheme.outline),
           borderRadius: BorderRadius.circular(12),
@@ -203,7 +218,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   : Icons.keyboard_arrow_down,
               color: theme.colorScheme.primary,
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Text(
               'Configurar perfil agora (opcional)',
               style: TextStyle(
@@ -225,7 +240,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           label: 'Nome Completo',
           icon: Icons.badge_outlined,
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         _buildTextField(
           controller: _cpfController,
           label: 'CPF',
@@ -233,7 +248,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           keyboardType: TextInputType.number,
           inputFormatters: [cpfMask],
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         _buildTextField(
           controller: _bairroController,
           label: 'Bairro',
@@ -287,20 +302,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildSubmitButton() {
     return _isLoading
-        ? Center(child: CircularProgressIndicator())
+        ? const Center(child: CircularProgressIndicator())
         : ElevatedButton(
             onPressed: () {
               HapticFeedback.mediumImpact();
               _register();
             },
-            child: Text('Criar minha conta',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               elevation: 2,
             ),
+            child: const Text('Criar minha conta',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           );
   }
 }
