@@ -59,7 +59,7 @@ class _MyAppState extends State<MyApp> {
           color: isDark ? Colors.white : const Color(0xFF203B85),
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: surfaceColor,
         elevation: 0,
         shape: RoundedRectangleBorder(
