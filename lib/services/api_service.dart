@@ -9,9 +9,16 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class ApiService {
   static const _tokenStorageKey = 'bairro_seguro_token';
 
-  // Tenta pegar do .env, se não existir usa um valor padrão
-  static String get baseUrl =>
-      dotenv.env['BASE_URL'] ?? 'http://10.0.2.2:8000/api';
+  static const String _compiledBaseUrl = String.fromEnvironment('BASE_URL');
+
+  // Tenta pegar do compilado, senão do .env, senão valor padrão
+  static String get baseUrl {
+    if (_compiledBaseUrl.isNotEmpty) return _compiledBaseUrl;
+    if (dotenv.isInitialized && dotenv.env['BASE_URL'] != null) {
+      return dotenv.env['BASE_URL']!;
+    }
+    return 'http://10.0.2.2:8000/api';
+  }
 
   String? _token;
 
