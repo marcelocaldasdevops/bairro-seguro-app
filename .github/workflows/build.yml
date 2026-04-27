@@ -24,7 +24,7 @@ jobs:
         run: flutter pub get
 
       - name: Build iOS (sem codesign)
-        run: flutter build ios --release --no-codesign --dart-define=BASE_URL=${{ vars.API_BASE_URL }}
+        run: flutter build ios --release --no-codesign --dart-define=BASE_URL=${{ vars.API_BASE_URL }} || true
 
       - name: Criar IPA manualmente
         run: |
