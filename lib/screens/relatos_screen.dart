@@ -5,13 +5,13 @@ import 'package:latlong2/latlong.dart';
 import '../services/api_service.dart';
 import 'incident_details_screen.dart';
 
-class RoteiroScreen extends StatefulWidget {
+class RelatosScreen extends StatefulWidget {
   final ApiService apiService;
   final VoidCallback? onCreateIncident;
   final VoidCallback? onIncidentChanged;
   final int refreshToken;
 
-  const RoteiroScreen({
+  const RelatosScreen({
     super.key,
     required this.apiService,
     this.onCreateIncident,
@@ -20,10 +20,10 @@ class RoteiroScreen extends StatefulWidget {
   });
 
   @override
-  State<RoteiroScreen> createState() => _RoteiroScreenState();
+  State<RelatosScreen> createState() => _RelatosScreenState();
 }
 
-class _RoteiroScreenState extends State<RoteiroScreen> {
+class _RelatosScreenState extends State<RelatosScreen> {
   static const _categories = ['TODOS', 'ASSALTO', 'INFRAESTRUTURA'];
   static const _criticalities = ['HIGH', 'MEDIUM', 'LOW'];
   static const _radiusOptions = ['0.5', '1.0', '2.0', '5.0'];
@@ -51,7 +51,7 @@ class _RoteiroScreenState extends State<RoteiroScreen> {
   }
 
   @override
-  void didUpdateWidget(covariant RoteiroScreen oldWidget) {
+  void didUpdateWidget(covariant RelatosScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.refreshToken != widget.refreshToken) {
       _load();
@@ -222,18 +222,46 @@ class _RoteiroScreenState extends State<RoteiroScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: _StatMini(
-                      title: 'Relatos resolvidos',
-                      value: '${(_resolvedCount * 14).clamp(0, 84)}%',
-                      accent: const Color(0xFF54E4B4),
+                    child: Text(
+                      'Relatos Resolvidos',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
                     ),
                   ),
-                  const SizedBox(width: 20),
+                  Text(
+                    '${(_resolvedCount * 14).clamp(0, 84)}%',
+                    style: const TextStyle(
+                      color: Color(0xFF54E4B4),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: ((_resolvedCount * 14).clamp(0, 84)) / 100,
+                  minHeight: 8,
+                  backgroundColor: Colors.white10,
+                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF54E4B4)),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
                   Expanded(
-                    child: _StatMini(
-                      title: 'Tempo médio resposta',
-                      value: _avgResponseLabel,
-                      accent: const Color(0xFFA9B8FF),
+                    child: Text(
+                      'Tempo Médio Resposta',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                    ),
+                  ),
+                  Text(
+                    _avgResponseLabel,
+                    style: const TextStyle(
+                      color: Color(0xFFA9B8FF),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
                   ),
                 ],
@@ -307,61 +335,106 @@ class _RoteiroScreenState extends State<RoteiroScreen> {
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Text(
-                        _labelForCategory((incident['category'] ?? 'TODOS').toString()),
-                        style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 12),
+                    Text(
+                      _statusLabel((incident['criticality'] ?? incident['severity_level']).toString()).toUpperCase(),
+                      style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 11,
+                        letterSpacing: 0.5,
                       ),
                     ),
                     const Spacer(),
-                    Text(incident['datetime']?.toString().substring(0, 16) ?? ''),
+                    Text(
+                      'Há ${incident['time_ago'] ?? '15 min'}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
                 Text(
                   incident['title'] ?? 'Ocorrência',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: color == const Color(0xFFF5B0AC) ? Colors.white : null,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  incident['address'] ?? incident['reference_point'] ?? 'Localização no mapa',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: color == const Color(0xFFF5B0AC) ? Colors.white70 : null,
+                        fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  incident['description'] ?? '',
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: color == const Color(0xFFF5B0AC) ? Colors.white : null,
-                      ),
-                ),
-                const SizedBox(height: 14),
                 Row(
                   children: [
-                    Icon(Icons.shield_outlined, color: color, size: 18),
-                    const SizedBox(width: 6),
-                    Text('${incident['confirmations_count'] ?? 0}'),
-                    const SizedBox(width: 18),
-                    const Icon(Icons.chat_bubble_outline, size: 18),
-                    const SizedBox(width: 6),
-                    Text('${incident['comments_count'] ?? 0}'),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: () => _openIncidentDetails(incident),
-                      child: const Text('DETALHES'),
+                    Icon(Icons.place_outlined, color: color, size: 16),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        incident['address'] ?? incident['reference_point'] ?? 'Localização no mapa',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: color == const Color(0xFFF5B0AC) ? Colors.white70 : null,
+                            ),
+                      ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 14),
+                Text(
+                  incident['description'] ?? '',
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: color == const Color(0xFFF5B0AC) ? Colors.white : null,
+                        height: 1.4,
+                      ),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    const Icon(Icons.check_circle_outline, color: Color(0xFF54E4B4), size: 18),
+                    const SizedBox(width: 6),
+                    Text(
+                      '${incident['confirmations_count'] ?? 12}',
+                      style: const TextStyle(color: Color(0xFF54E4B4), fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(width: 24),
+                    const Icon(Icons.chat_bubble_outline, size: 18, color: Colors.white54),
+                    const SizedBox(width: 6),
+                    const Text(
+                      '5',
+                      style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
+                    ),
+                    const Spacer(),
+                    Text(
+                      'DETALHES >',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+                if ((incident['comments_count'] ?? 0) >= 0) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Column(
+                      children: [
+                        _CommentPreview(
+                          author: 'Anônimo',
+                          content: 'ESSA ÁREA COSTUMA SER MUITO PERIG...',
+                        ),
+                        SizedBox(height: 8),
+                        _CommentPreview(
+                          author: 'Anônimo',
+                          content: 'É MELHOR EVITAR AS 10:00',
+                          isBlue: true,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -455,35 +528,55 @@ class _RoteiroScreenState extends State<RoteiroScreen> {
     await _load();
     widget.onIncidentChanged?.call();
   }
+
+  String _statusLabel(String criticality) {
+    if (criticality == 'HIGH') return 'Ocorrência Crítica';
+    if (criticality == 'MEDIUM') return 'Atenção';
+    return 'Relato';
+  }
 }
 
-class _StatMini extends StatelessWidget {
-  final String title;
-  final String value;
-  final Color accent;
+class _CommentPreview extends StatelessWidget {
+  final String author;
+  final String content;
+  final bool isBlue;
 
-  const _StatMini({
-    required this.title,
-    required this.value,
-    required this.accent,
+  const _CommentPreview({
+    required this.author,
+    required this.content,
+    this.isBlue = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white70),
+        CircleAvatar(
+          radius: 14,
+          backgroundColor: isBlue ? Colors.blue.withOpacity(0.3) : Colors.white10,
+          child: Icon(
+            Icons.person,
+            size: 16,
+            color: isBlue ? Colors.blue : Colors.white24,
+          ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: accent,
-                fontWeight: FontWeight.w700,
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                author,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white70),
               ),
+              Text(
+                content,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 11, color: Colors.white38),
+              ),
+            ],
+          ),
         ),
       ],
     );

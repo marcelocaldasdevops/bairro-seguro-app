@@ -1,0 +1,72 @@
+name: Build App (iOS IPA e Android APK)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: Build iOS IPA
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Instalar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: 'stable'
+
+      - name: Instalar dependências
+        run: flutter pub get
+
+      - name: Build iOS (sem codesign)
+        run: flutter build ios --release --no-codesign --dart-define=BASE_URL=${{ vars.API_BASE_URL }}
+
+      - name: Criar IPA manualmente
+        run: |
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r app.ipa Payload
+
+      - name: Upload IPA como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-ipa
+          path: build/ios/iphoneos/app.ipa
+
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Instalar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: 'stable'
+
+      - name: Instalar dependências
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --release --dart-define=BASE_URL=${{ vars.API_BASE_URL }}
+
+      - name: Upload APK como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-apk
+          path: build/app/outputs/flutter-apk/app-release.apk

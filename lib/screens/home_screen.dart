@@ -6,7 +6,7 @@ import 'alerts_screen.dart';
 import 'dashboard_screen.dart';
 import 'profile_screen.dart';
 import 'report_incident_screen.dart';
-import 'roteiro_screen.dart';
+import 'relatos_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final ApiService apiService;
@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
         apiService: widget.apiService,
         refreshToken: _refreshToken,
       ),
-      RoteiroScreen(
+      RelatosScreen(
         apiService: widget.apiService,
         onCreateIncident: _openReportTab,
         onIncidentChanged: _refreshDataAndGoToRoteiro,

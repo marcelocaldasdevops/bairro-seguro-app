@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class CriticalAlertCard extends StatelessWidget {
   final Map<String, dynamic> incident;
@@ -59,11 +61,37 @@ class CriticalAlertCard extends StatelessWidget {
                   ),
             ),
             const Spacer(),
-            Container(
-              height: 76,
-              decoration: BoxDecoration(
-                color: const Color(0xFF85B878),
+            SizedBox(
+              height: 100,
+              child: ClipRRect(
                 borderRadius: BorderRadius.circular(22),
+                child: FlutterMap(
+                  options: MapOptions(
+                    initialCenter: _getIncidentLatLng(incident),
+                    initialZoom: 14,
+                    interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'br.com.bairroseguro.app',
+                    ),
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: _getIncidentLatLng(incident),
+                          width: 30,
+                          height: 30,
+                          child: const Icon(
+                            Icons.location_on,
+                            color: Color(0xFFF5B0AC),
+                            size: 30,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -71,6 +99,13 @@ class CriticalAlertCard extends StatelessWidget {
       ),
     );
   }
+}
+
+LatLng _getIncidentLatLng(Map<String, dynamic> incident) {
+  final location = incident['location'] as Map<String, dynamic>?;
+  final latitude = double.tryParse(location?['latitude']?.toString() ?? '') ?? -3.10;
+  final longitude = double.tryParse(location?['longitude']?.toString() ?? '') ?? -59.97;
+  return LatLng(latitude, longitude);
 }
 
 class AlertListTile extends StatelessWidget {

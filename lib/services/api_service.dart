@@ -151,11 +151,18 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> getDashboardSummary() async {
-    final response = await _client.get(
-      Uri.parse('$baseUrl/incidents/dashboard/'),
-      headers: _headers,
-    );
+  Future<Map<String, dynamic>> getDashboardSummary({
+    double? latitude,
+    double? longitude,
+    double? radiusKm,
+  }) async {
+    final query = <String, String>{};
+    if (latitude != null) query['latitude'] = latitude.toString();
+    if (longitude != null) query['longitude'] = longitude.toString();
+    if (radiusKm != null) query['radius_km'] = radiusKm.toString();
+
+    final uri = Uri.parse('$baseUrl/incidents/dashboard/').replace(queryParameters: query);
+    final response = await _client.get(uri, headers: _headers);
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
