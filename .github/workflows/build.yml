@@ -24,7 +24,7 @@ jobs:
         run: flutter pub get
 
       - name: Build iOS (sem codesign)
-        run: flutter build ios --release --no-codesign --dart-define=BASE_URL=${{ vars.API_BASE_URL }} || true
+        run: flutter build ios --release --no-codesign --dart-define=BASE_URL=${{ vars.API_BASE_URL }}
 
       - name: Criar IPA manualmente
         run: |
@@ -63,7 +63,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Android APK
-        run: flutter build apk --release --dart-define=BASE_URL=${{ vars.API_BASE_URL }}
+        run: flutter build apk --release --dart-define=BASE_URL=${{ vars.API_BASE_URL }} --android-skip-build-dependency-validation
 
       - name: Upload APK como artefato
         uses: actions/upload-artifact@v4
