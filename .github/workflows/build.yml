@@ -23,27 +23,54 @@ jobs:
       - name: Instalar dependências
         run: flutter pub get
 
-      - name: Preparar PBXProj para sem Codesign
-        run: |
-          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj || true
-          sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "";/g' ios/Runner.xcodeproj/project.pbxproj || true
-          sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Developer";/CODE_SIGN_IDENTITY = "";/g' ios/Runner.xcodeproj/project.pbxproj || true
+      - name: Criar arquivo .env vazio
+        run: touch .env
 
       - name: Build iOS (sem codesign)
         run: flutter build ios --release --no-codesign --dart-define=BASE_URL=${{ vars.API_BASE_URL }}
+        env:
+          CODE_SIGNING_ALLOWED: 'NO'
+          CODE_SIGN_IDENTITY: ''
+          CODE_SIGNING_REQUIRED: 'NO'
+        continue-on-error: true
+
+      - name: Recompilar com xcodebuild direto (fallback)
+        run: |
+          if [ ! -d "build/ios/iphoneos/Runner.app" ] && [ ! -d "build/ios/Release-iphoneos/Runner.app" ]; then
+            cd ios
+            pod install
+            xcodebuild \
+              -workspace Runner.xcworkspace \
+              -scheme Runner \
+              -configuration Release \
+              -sdk iphoneos \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGN_IDENTITY="" \
+              CODE_SIGNING_REQUIRED=NO \
+              PROVISIONING_PROFILE="" \
+              DEVELOPMENT_TEAM="" \
+              clean build \
+              FLUTTER_BUILD_DIR=../build \
+              OBJROOT=../build/ios \
+              SYMROOT=../build/ios
+          fi
 
       - name: Criar IPA manualmente
         run: |
-          cd build/ios/iphoneos
+          APP_PATH=$(find build/ios -name "*.app" | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Erro: Runner.app não encontrado"
+            exit 1
+          fi
           mkdir -p Payload
-          cp -r Runner.app Payload/
+          cp -r "$APP_PATH" Payload/
           zip -r app.ipa Payload
 
       - name: Upload IPA como artefato
         uses: actions/upload-artifact@v4
         with:
           name: app-ipa
-          path: build/ios/iphoneos/app.ipa
+          path: app.ipa
 
   build-android:
     name: Build Android APK
@@ -67,6 +94,9 @@ jobs:
 
       - name: Instalar dependências
         run: flutter pub get
+
+      - name: Criar arquivo .env vazio
+        run: touch .env
 
       - name: Build Android APK
         run: flutter build apk --release --dart-define=BASE_URL=${{ vars.API_BASE_URL }} --android-skip-build-dependency-validation
