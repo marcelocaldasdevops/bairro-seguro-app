@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiService {
   static const _tokenStorageKey = 'bairro_seguro_token';
+  static const _refreshTokenStorageKey = 'bairro_seguro_refresh_token';
 
   static const String _compiledBaseUrl = String.fromEnvironment('BASE_URL');
 
@@ -21,6 +22,10 @@ class ApiService {
   }
 
   String? _token;
+  String? _refreshToken;
+
+  @visibleForTesting
+  set token(String? value) => _token = value;
 
   // Cliente HTTP que aceita certificados auto-assinados
   http.Client get _client {
@@ -30,24 +35,106 @@ class ApiService {
     return IOClient(ioc);
   }
 
-  Future<void> setToken(String token) async {
+  Future<void> setTokens({required String token, required String refreshToken}) async {
     _token = token;
+    _refreshToken = refreshToken;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_tokenStorageKey, token);
+    await prefs.setString(_refreshTokenStorageKey, refreshToken);
+  }
+
+  Future<bool> refreshAccessToken() async {
+    if (_refreshToken == null || _refreshToken!.isEmpty) {
+      return false;
+    }
+
+    try {
+      final response = await _client.post(
+        Uri.parse('$baseUrl/users/token/refresh/'),
+        headers: _publicJsonHeaders,
+        body: jsonEncode({'refresh': _refreshToken}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        _token = data['access'];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_tokenStorageKey, _token!);
+        debugPrint('Token JWT de acesso renovado com sucesso.');
+        return true;
+      }
+    } catch (e) {
+      debugPrint('Erro ao renovar token JWT: $e');
+    }
+    return false;
+  }
+
+  Future<http.Response> _get(Uri url) async {
+    var response = await _client.get(url, headers: _headers);
+    if (response.statusCode == 401) {
+      final success = await refreshAccessToken();
+      if (success) {
+        response = await _client.get(url, headers: _headers);
+      }
+    }
+    return response;
+  }
+
+  Future<http.Response> _post(Uri url, {Object? body}) async {
+    var response = await _client.post(url, headers: _headers, body: body);
+    if (response.statusCode == 401) {
+      final success = await refreshAccessToken();
+      if (success) {
+        response = await _client.post(url, headers: _headers, body: body);
+      }
+    }
+    return response;
+  }
+
+  Future<http.Response> _delete(Uri url) async {
+    var response = await _client.delete(url, headers: _headers);
+    if (response.statusCode == 401) {
+      final success = await refreshAccessToken();
+      if (success) {
+        response = await _client.delete(url, headers: _headers);
+      }
+    }
+    return response;
+  }
+
+  Future<http.Response> _patch(Uri url, {Object? body}) async {
+    var response = await _client.patch(url, headers: _headers, body: body);
+    if (response.statusCode == 401) {
+      final success = await refreshAccessToken();
+      if (success) {
+        response = await _client.patch(url, headers: _headers, body: body);
+      }
+    }
+    return response;
   }
 
   Future<bool> restoreSession() async {
     final prefs = await SharedPreferences.getInstance();
     final savedToken = prefs.getString(_tokenStorageKey);
+    final savedRefreshToken = prefs.getString(_refreshTokenStorageKey);
     if (savedToken == null || savedToken.isEmpty) {
       return false;
     }
     _token = savedToken;
+    _refreshToken = savedRefreshToken;
 
     try {
       await getProfile();
       return true;
     } catch (_) {
+      try {
+        final success = await refreshAccessToken();
+        if (success) {
+          return true;
+        }
+      } catch (e) {
+        debugPrint('Erro ao renovar sessao na restauracao: $e');
+      }
       await logout();
       return false;
     }
@@ -55,8 +142,10 @@ class ApiService {
 
   Future<void> logout() async {
     _token = null;
+    _refreshToken = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenStorageKey);
+    await prefs.remove(_refreshTokenStorageKey);
   }
 
   Map<String, String> get _headers => {
@@ -77,7 +166,7 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      await setToken(data['token']);
+      await setTokens(token: data['token'], refreshToken: data['refresh'] ?? '');
       return data;
     } else {
       throw Exception(jsonDecode(response.body)['error'] ?? 'Erro no login');
@@ -120,9 +209,8 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getProfile() async {
-    final response = await _client.get(
+    final response = await _get(
       Uri.parse('$baseUrl/users/me/'),
-      headers: _headers,
     );
 
     if (response.statusCode == 200) {
@@ -134,9 +222,8 @@ class ApiService {
 
   Future<void> updateProfile(Map<String, dynamic> data) async {
     final profile = await getProfile();
-    final response = await _client.patch(
+    final response = await _patch(
       Uri.parse('$baseUrl/users/${profile['id']}/'),
-      headers: _headers,
       body: jsonEncode(data),
     );
 
@@ -146,9 +233,8 @@ class ApiService {
   }
 
   Future<List<dynamic>> getIncidents() async {
-    final response = await _client.get(
+    final response = await _get(
       Uri.parse('$baseUrl/incidents/'),
-      headers: _headers,
     );
 
     if (response.statusCode == 200) {
@@ -169,7 +255,7 @@ class ApiService {
     if (radiusKm != null) query['radius_km'] = radiusKm.toString();
 
     final uri = Uri.parse('$baseUrl/incidents/dashboard/').replace(queryParameters: query);
-    final response = await _client.get(uri, headers: _headers);
+    final response = await _get(uri);
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -190,7 +276,7 @@ class ApiService {
     }
 
     final uri = Uri.parse('$baseUrl/incidents/feed/').replace(queryParameters: query);
-    final response = await _client.get(uri, headers: _headers);
+    final response = await _get(uri);
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -205,7 +291,7 @@ class ApiService {
     }
 
     final uri = Uri.parse('$baseUrl/incidents/map/').replace(queryParameters: query);
-    final response = await _client.get(uri, headers: _headers);
+    final response = await _get(uri);
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -214,9 +300,8 @@ class ApiService {
   }
 
   Future<List<dynamic>> getIncidentComments(int incidentId) async {
-    final response = await _client.get(
+    final response = await _get(
       Uri.parse('$baseUrl/incidents/$incidentId/comments/'),
-      headers: _headers,
     );
 
     if (response.statusCode == 200) {
@@ -226,9 +311,8 @@ class ApiService {
   }
 
   Future<void> confirmIncident(int incidentId) async {
-    final response = await _client.post(
+    final response = await _post(
       Uri.parse('$baseUrl/incidents/$incidentId/confirm/'),
-      headers: _headers,
     );
 
     if (response.statusCode != 200 && response.statusCode != 201) {
@@ -237,9 +321,8 @@ class ApiService {
   }
 
   Future<void> unconfirmIncident(int incidentId) async {
-    final response = await _client.delete(
+    final response = await _delete(
       Uri.parse('$baseUrl/incidents/$incidentId/confirm/'),
-      headers: _headers,
     );
 
     if (response.statusCode != 204) {
@@ -248,9 +331,8 @@ class ApiService {
   }
 
   Future<void> createComment(int incidentId, String content) async {
-    final response = await _client.post(
+    final response = await _post(
       Uri.parse('$baseUrl/incidents/$incidentId/comments/'),
-      headers: _headers,
       body: jsonEncode({'content': content}),
     );
 
@@ -260,9 +342,8 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> createIncident(Map<String, dynamic> data) async {
-    final response = await _client.post(
+    final response = await _post(
       Uri.parse('$baseUrl/incidents/'),
-      headers: _headers,
       body: jsonEncode(data),
     );
     if (response.statusCode == 201) {
@@ -314,8 +395,26 @@ class ApiService {
     request.fields['attachment_type'] = attachmentType;
     request.files.add(await http.MultipartFile.fromPath('file', file.path));
 
-    final streamed = await _client.send(request);
-    final response = await http.Response.fromStream(streamed);
+    var streamed = await _client.send(request);
+    var response = await http.Response.fromStream(streamed);
+
+    if (response.statusCode == 401) {
+      final success = await refreshAccessToken();
+      if (success) {
+        final retryRequest = http.MultipartRequest(
+          'POST',
+          Uri.parse('$baseUrl/incidents/$incidentId/attachments/'),
+        );
+        if (_token != null) {
+          retryRequest.headers['Authorization'] = 'Bearer $_token';
+        }
+        retryRequest.fields['attachment_type'] = attachmentType;
+        retryRequest.files.add(await http.MultipartFile.fromPath('file', file.path));
+        streamed = await _client.send(retryRequest);
+        response = await http.Response.fromStream(streamed);
+      }
+    }
+
     if (response.statusCode == 201) {
       return jsonDecode(response.body);
     }
@@ -323,9 +422,8 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getIncidentDetails(int incidentId) async {
-    final response = await _client.get(
+    final response = await _get(
       Uri.parse('$baseUrl/incidents/$incidentId/'),
-      headers: _headers,
     );
 
     if (response.statusCode == 200) {

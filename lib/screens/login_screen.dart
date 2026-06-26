@@ -14,6 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -102,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _emailController,
                   style: TextStyle(color: theme.colorScheme.onSurface),
                   decoration: InputDecoration(
-                    labelText: 'E-mail',
+                    labelText: 'E-mail *',
                     labelStyle:
                         TextStyle(color: theme.colorScheme.onSurfaceVariant),
                     prefixIcon: Icon(Icons.email_outlined,
@@ -116,15 +117,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _passwordController,
                   style: TextStyle(color: theme.colorScheme.onSurface),
                   decoration: InputDecoration(
-                    labelText: 'Senha',
+                    labelText: 'Senha *',
                     labelStyle:
                         TextStyle(color: theme.colorScheme.onSurfaceVariant),
                     prefixIcon: Icon(Icons.lock_outline,
                         color: theme.colorScheme.primary),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                        color: theme.colorScheme.primary,
+                      ),
+                      onPressed: () {
+                        setState(() => _obscurePassword = !_obscurePassword);
+                      },
+                    ),
                     filled: true,
                     fillColor: theme.colorScheme.surfaceContainerHighest,
                   ),
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                 ),
                 const SizedBox(height: 32),
                 _isLoading

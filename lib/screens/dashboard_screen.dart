@@ -54,7 +54,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
 
         if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
-          position = await Geolocator.getCurrentPosition();
+          position = await Geolocator.getCurrentPosition(
+            timeLimit: const Duration(seconds: 5),
+          );
           setState(() => _currentPosition = position);
         }
       } catch (e) {

@@ -38,11 +38,6 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
   bool _isLoading = false;
   File? _selectedImage;
 
-  static const _quickLocations = [
-    ('Minha rua', 'Rua Petrópolis'),
-    ('Novo local', 'Definir manualmente'),
-  ];
-
   @override
   void dispose() {
     _titleController.dispose();
@@ -60,12 +55,22 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
 
   Future<void> _determinePosition() async {
     try {
-      final position = await Geolocator.getCurrentPosition();
-      final newLocation = LatLng(position.latitude, position.longitude);
-      setState(() {
-        _selectedLocation = newLocation;
-      });
-      _mapController.move(newLocation, 15);
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+        final position = await Geolocator.getCurrentPosition(
+          timeLimit: const Duration(seconds: 5),
+        );
+        final newLocation = LatLng(position.latitude, position.longitude);
+        setState(() {
+          _selectedLocation = newLocation;
+          _addressController.text = "Coordenadas: ${newLocation.latitude.toStringAsFixed(6)}, ${newLocation.longitude.toStringAsFixed(6)}";
+        });
+        _mapController.move(newLocation, 15);
+      }
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -447,97 +452,18 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
   }
 
   Widget _buildLocationStep() {
+    if (_addressController.text.trim().isEmpty) {
+      _addressController.text = "Coordenadas: ${_selectedLocation.latitude.toStringAsFixed(6)}, ${_selectedLocation.longitude.toStringAsFixed(6)}";
+    }
+
     return Column(
       key: const ValueKey('step_location'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle('Onde ocorreu'),
         const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.gps_fixed, color: Theme.of(context).colorScheme.primary),
-                  const SizedBox(width: 10),
-                  const Text('Endereço detectado', style: TextStyle(fontWeight: FontWeight.w700)),
-                ],
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _addressController,
-                onChanged: (_) => setState(() {}),
-                decoration: const InputDecoration(
-                  labelText: 'Endereço detectado ou informado',
-                  prefixIcon: Icon(Icons.place_outlined),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _referenceController,
-                decoration: const InputDecoration(
-                  labelText: 'Ponto de referência',
-                  prefixIcon: Icon(Icons.near_me_outlined),
-                ),
-              ),
-              const SizedBox(height: 14),
-              OutlinedButton.icon(
-                onPressed: _determinePosition,
-                icon: const Icon(Icons.edit_location_alt_outlined),
-                label: const Text('Ajustar localização manualmente'),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: _quickLocations.map((item) {
-            final isManual = item.$1 == 'Novo local';
-            return Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(right: isManual ? 0 : 12),
-                child: GestureDetector(
-                  onTap: () {
-                    if (!isManual) {
-                      setState(() {
-                        _addressController.text = item.$2;
-                      });
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          isManual ? Icons.add_circle_outline : Icons.groups_2_outlined,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(height: 14),
-                        Text(item.$1, style: const TextStyle(fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 6),
-                        Text(item.$2, style: Theme.of(context).textTheme.bodySmall),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-        const SizedBox(height: 16),
         SizedBox(
-          height: 260,
+          height: 420,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(24),
             child: Stack(
@@ -547,7 +473,12 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
                   options: MapOptions(
                     initialCenter: _selectedLocation,
                     initialZoom: 15,
-                    onTap: (_, latlng) => setState(() => _selectedLocation = latlng),
+                    onTap: (_, latlng) {
+                      setState(() {
+                        _selectedLocation = latlng;
+                        _addressController.text = "Coordenadas: ${latlng.latitude.toStringAsFixed(6)}, ${latlng.longitude.toStringAsFixed(6)}";
+                      });
+                    },
                   ),
                   children: [
                     TileLayer(
@@ -571,6 +502,7 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
                   left: 12,
                   right: 12,
                   child: Card(
+                    elevation: 2,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       child: Text(
@@ -672,43 +604,50 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
 
   Widget _buildCategoryGrid() {
     const categories = [
-      ('ASSALTO', 'Assalto', Icons.local_police_outlined),
-      ('ACIDENTE', 'Acidente', Icons.car_crash_outlined),
-      ('SUSPEITO', 'Suspeito', Icons.visibility_outlined),
-      ('OUTRO', 'Outro', Icons.more_horiz),
+      ('ASSALTO', 'Assalto'),
+      ('ACIDENTE', 'Acidente'),
+      ('SUSPEITO', 'Suspeito'),
+      ('OUTRO', 'Outro'),
     ];
 
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: categories.map((item) {
-        final isSelected = _category == item.$1;
-        return GestureDetector(
-          onTap: () => setState(() => _category = item.$1),
-          child: Container(
-            width: (MediaQuery.of(context).size.width - 52) / 2,
-            padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? Theme.of(context).colorScheme.primary.withOpacity(0.16)
-                  : Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.transparent,
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.3)),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: categories.map((item) {
+          final isSelected = _category == item.$1;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _category = item.$1),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary.withOpacity(0.12)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  item.$2,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                    fontSize: 13,
+                  ),
+                ),
               ),
             ),
-            child: Column(
-              children: [
-                Icon(item.$3, size: 32),
-                const SizedBox(height: 16),
-                Text(item.$2, style: const TextStyle(fontWeight: FontWeight.w700)),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
   }
 }

@@ -17,12 +17,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _nameController = TextEditingController();
   final _cpfController = TextEditingController();
   final _bairroController = TextEditingController();
 
   bool _isLoading = false;
-  bool _showOptionalFields = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   final cpfMask = MaskTextInputFormatter(
     mask: '###.###.###-##',
@@ -35,6 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _nameController.dispose();
     _cpfController.dispose();
     _bairroController.dispose();
@@ -124,11 +127,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 32),
                 _buildBaseFields(),
                 const SizedBox(height: 24),
-                _buildOptionalToggle(),
-                if (_showOptionalFields) ...[
-                  const SizedBox(height: 16),
-                  _buildOptionalFields(),
-                ],
+                _buildOptionalFields(),
                 const SizedBox(height: 48),
                 _buildSubmitButton(),
               ],
@@ -166,18 +165,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _buildBaseFields() {
+    final theme = Theme.of(context);
     return Column(
       children: [
         _buildTextField(
           controller: _usernameController,
-          label: 'Nome de Usuário',
+          label: 'Nome de Usuário *',
           icon: Icons.person_outline,
           validator: (val) => val!.isEmpty ? 'Campo obrigatório' : null,
         ),
         const SizedBox(height: 16),
         _buildTextField(
           controller: _emailController,
-          label: 'E-mail',
+          label: 'E-mail *',
           icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
           validator: (val) =>
@@ -186,49 +186,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
         const SizedBox(height: 16),
         _buildTextField(
           controller: _passwordController,
-          label: 'Senha',
+          label: 'Senha *',
           icon: Icons.lock_outline,
-          obscureText: true,
+          obscureText: _obscurePassword,
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscurePassword
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+              color: theme.colorScheme.primary,
+            ),
+            onPressed: () {
+              setState(() => _obscurePassword = !_obscurePassword);
+            },
+          ),
           helperText: 'Mínimo 8 caracteres, com letras e números',
           validator: (val) => val!.length < 8 ? 'Senha muito curta' : null,
         ),
-      ],
-    );
-  }
-
-  Widget _buildOptionalToggle() {
-    final theme = Theme.of(context);
-    return InkWell(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        setState(() => _showOptionalFields = !_showOptionalFields);
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          border: Border.all(color: theme.colorScheme.outline),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              _showOptionalFields
-                  ? Icons.keyboard_arrow_up
-                  : Icons.keyboard_arrow_down,
+        const SizedBox(height: 16),
+        _buildTextField(
+          controller: _confirmPasswordController,
+          label: 'Confirmar Senha *',
+          icon: Icons.lock_outline,
+          obscureText: _obscureConfirmPassword,
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscureConfirmPassword
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
               color: theme.colorScheme.primary,
             ),
-            const SizedBox(width: 12),
-            Text(
-              'Configurar perfil agora (opcional)',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-          ],
+            onPressed: () {
+              setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+            },
+          ),
+          validator: (val) {
+            if (val == null || val.isEmpty) {
+              return 'Campo obrigatório';
+            }
+            if (val != _passwordController.text) {
+              return 'As senhas não coincidem';
+            }
+            return null;
+          },
         ),
-      ),
+      ],
     );
   }
 
@@ -263,6 +265,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     required String label,
     required IconData icon,
     bool obscureText = false,
+    Widget? suffixIcon,
     TextInputType? keyboardType,
     List<dynamic>? inputFormatters,
     String? Function(String?)? validator,
@@ -281,6 +284,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         labelText: label,
         labelStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
         prefixIcon: Icon(icon, color: theme.colorScheme.primary),
+        suffixIcon: suffixIcon,
         helperText: helperText,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
