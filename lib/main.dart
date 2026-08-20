@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart'; // Added
@@ -8,8 +9,20 @@ import 'services/api_service.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) {
+        // Ignora a verificação para o servidor de staging e localhost/emulador
+        return host == '136.112.211.206' || host == '10.0.2.2' || host == 'localhost' || host == '192.168.1.25';
+      };
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = MyHttpOverrides();
   try {
     await dotenv.load(fileName: ".env");
   } catch (_) {
@@ -18,6 +31,7 @@ Future<void> main() async {
   }
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});

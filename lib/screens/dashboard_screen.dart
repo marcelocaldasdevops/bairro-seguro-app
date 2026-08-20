@@ -48,16 +48,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Obter localização real
       Position? position;
       try {
-        LocationPermission permission = await Geolocator.checkPermission();
-        if (permission == LocationPermission.denied) {
-          permission = await Geolocator.requestPermission();
-        }
+        final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (serviceEnabled) {
+          LocationPermission permission = await Geolocator.checkPermission();
+          if (permission == LocationPermission.denied) {
+            permission = await Geolocator.requestPermission();
+          }
 
-        if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
-          position = await Geolocator.getCurrentPosition(
-            timeLimit: const Duration(seconds: 5),
-          );
-          setState(() => _currentPosition = position);
+          if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+            position = await Geolocator.getCurrentPosition()
+                .timeout(const Duration(seconds: 5));
+            setState(() => _currentPosition = position);
+          }
         }
       } catch (e) {
         debugPrint('Erro ao obter localização: $e');

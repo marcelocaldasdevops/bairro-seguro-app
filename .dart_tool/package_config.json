@@ -2,6 +2,24 @@
   "configVersion": 2,
   "packages": [
     {
+      "name": "ansicolor",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/ansicolor-2.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "archive",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/archive-4.0.9",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "args",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/args-2.7.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
       "name": "async",
       "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/async-2.11.0",
       "packageUri": "lib/",
@@ -15,27 +33,51 @@
     },
     {
       "name": "characters",
-      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/characters-1.3.0",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/characters-1.4.0",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "checked_yaml",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/checked_yaml-2.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "cli_util",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/cli_util-0.4.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
     },
     {
       "name": "clock",
-      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/clock-1.1.1",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/clock-1.1.2",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.4"
     },
     {
       "name": "collection",
-      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/collection-1.18.0",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/collection-1.19.1",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "cross_file",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/cross_file-0.3.4+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
     },
     {
       "name": "crypto",
       "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/crypto-3.0.7",
       "packageUri": "lib/",
       "languageVersion": "3.4"
+    },
+    {
+      "name": "csslib",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/csslib-1.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
     },
     {
       "name": "cupertino_icons",
@@ -51,9 +93,45 @@
     },
     {
       "name": "fake_async",
-      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/fake_async-1.3.1",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/fake_async-1.3.3",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "ffi",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/ffi-2.1.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "file",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/file-7.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "file_selector_linux",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/file_selector_linux-0.9.3+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "file_selector_macos",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/file_selector_macos-0.9.4+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "file_selector_platform_interface",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/file_selector_platform_interface-2.6.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "file_selector_windows",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/file_selector_windows-0.9.3+4",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
     },
     {
       "name": "fixnum",
@@ -63,9 +141,21 @@
     },
     {
       "name": "flutter",
-      "rootUri": "file:///opt/flutter/packages/flutter",
+      "rootUri": "file:///home/marcelo/fvm/versions/stable/packages/flutter",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.8"
+    },
+    {
+      "name": "flutter_dotenv",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/flutter_dotenv-6.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_launcher_icons",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/flutter_launcher_icons-0.14.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "flutter_lints",
@@ -80,16 +170,28 @@
       "languageVersion": "3.0"
     },
     {
-      "name": "flutter_test",
-      "rootUri": "file:///opt/flutter/packages/flutter_test",
+      "name": "flutter_native_splash",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/flutter_native_splash-2.4.4",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "flutter_plugin_android_lifecycle",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.26",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "flutter_test",
+      "rootUri": "file:///home/marcelo/fvm/versions/stable/packages/flutter_test",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
     },
     {
       "name": "flutter_web_plugins",
-      "rootUri": "file:///opt/flutter/packages/flutter_web_plugins",
+      "rootUri": "file:///home/marcelo/fvm/versions/stable/packages/flutter_web_plugins",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.8"
     },
     {
       "name": "geolocator",
@@ -128,6 +230,12 @@
       "languageVersion": "3.5"
     },
     {
+      "name": "html",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/html-0.15.6",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
       "name": "http",
       "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/http-1.6.0",
       "packageUri": "lib/",
@@ -140,10 +248,70 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "image",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/image-4.8.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "image_picker",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/image_picker-1.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "image_picker_android",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+21",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "image_picker_for_web",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/image_picker_for_web-3.0.6",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "image_picker_ios",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/image_picker_ios-0.8.12+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "image_picker_linux",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/image_picker_linux-0.2.1+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "image_picker_macos",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/image_picker_macos-0.2.1+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "image_picker_platform_interface",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/image_picker_platform_interface-2.10.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "image_picker_windows",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/image_picker_windows-0.2.1+1",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
       "name": "intl",
       "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/intl-0.20.2",
       "packageUri": "lib/",
       "languageVersion": "3.3"
+    },
+    {
+      "name": "json_annotation",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/json_annotation-4.9.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "latlong2",
@@ -153,19 +321,19 @@
     },
     {
       "name": "leak_tracker",
-      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/leak_tracker-10.0.5",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/leak_tracker-11.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "leak_tracker_flutter_testing",
-      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/leak_tracker_flutter_testing-3.0.5",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/leak_tracker_flutter_testing-3.0.10",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "leak_tracker_testing",
-      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/leak_tracker_testing-3.0.1",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/leak_tracker_testing-3.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
@@ -195,9 +363,9 @@
     },
     {
       "name": "matcher",
-      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/matcher-0.12.16+1",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/matcher-0.12.17",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.4"
     },
     {
       "name": "material_color_utilities",
@@ -207,9 +375,9 @@
     },
     {
       "name": "meta",
-      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/meta-1.15.0",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/meta-1.17.0",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.5"
     },
     {
       "name": "mgrs_dart",
@@ -218,10 +386,46 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "mime",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/mime-2.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
       "name": "path",
-      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/path-1.9.0",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/path-1.9.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "path_provider_linux",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "path_provider_platform_interface",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/path_provider_platform_interface-2.1.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
+    },
+    {
+      "name": "path_provider_windows",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "petitparser",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/petitparser-6.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "platform",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/platform-3.1.6",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
     },
     {
       "name": "plugin_platform_interface",
@@ -236,16 +440,70 @@
       "languageVersion": "2.13"
     },
     {
+      "name": "posix",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/posix-6.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "proj4dart",
       "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/proj4dart-2.1.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
-      "name": "sky_engine",
-      "rootUri": "file:///opt/flutter/bin/cache/pkg/sky_engine",
+      "name": "shared_preferences",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/shared_preferences-2.5.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "shared_preferences_android",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.7",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "shared_preferences_foundation",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "shared_preferences_linux",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "shared_preferences_platform_interface",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/shared_preferences_platform_interface-2.4.1",
       "packageUri": "lib/",
       "languageVersion": "3.2"
+    },
+    {
+      "name": "shared_preferences_web",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "shared_preferences_windows",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "shimmer",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/shimmer-3.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "sky_engine",
+      "rootUri": "file:///home/marcelo/fvm/versions/stable/bin/cache/pkg/sky_engine",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
     },
     {
       "name": "source_span",
@@ -255,15 +513,15 @@
     },
     {
       "name": "stack_trace",
-      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/stack_trace-1.11.1",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/stack_trace-1.12.1",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.4"
     },
     {
       "name": "stream_channel",
-      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/stream_channel-2.1.2",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/stream_channel-2.1.4",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.3"
     },
     {
       "name": "string_scanner",
@@ -279,9 +537,15 @@
     },
     {
       "name": "test_api",
-      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/test_api-0.7.2",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/test_api-0.7.7",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "translator",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/translator-1.0.4+1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "typed_data",
@@ -296,6 +560,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "universal_io",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/universal_io-2.2.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "uuid",
       "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/uuid-4.5.2",
       "packageUri": "lib/",
@@ -303,9 +573,9 @@
     },
     {
       "name": "vector_math",
-      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/vector_math-2.1.4",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/vector_math-2.2.0",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "3.1"
     },
     {
       "name": "vm_service",
@@ -326,16 +596,33 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "mobile",
+      "name": "xdg_directories",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/xdg_directories-1.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "xml",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/xml-6.5.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "yaml",
+      "rootUri": "file:///home/marcelo/.pub-cache/hosted/pub.dev/yaml-3.1.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "bairro_seguro",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     }
   ],
-  "generated": "2026-02-16T14:07:17.734206Z",
   "generator": "pub",
-  "generatorVersion": "3.5.4",
-  "flutterRoot": "file:///opt/flutter",
-  "flutterVersion": "3.24.5",
+  "generatorVersion": "3.10.7",
+  "flutterRoot": "file:///home/marcelo/fvm/versions/stable",
+  "flutterVersion": "3.38.6",
   "pubCache": "file:///home/marcelo/.pub-cache"
 }

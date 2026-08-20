@@ -18,6 +18,7 @@ class ApiService {
     if (dotenv.isInitialized && dotenv.env['BASE_URL'] != null) {
       return dotenv.env['BASE_URL']!;
     }
+    debugPrint('AVISO: BASE_URL está usando o padrão de emulador: http://10.0.2.2:8000/api. Em aparelhos físicos isso falhará.');
     return 'http://10.0.2.2:8000/api';
   }
 
